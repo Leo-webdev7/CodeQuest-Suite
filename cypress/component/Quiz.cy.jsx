@@ -1,65 +1,52 @@
-/* import Quiz from '../../client/src/components/Quiz';
+import Quiz from '../../client/src/components/Quiz'
 
 describe('Quiz.cy.tsx', () => {
-  const startButtonSelector = 'button';
-  const questionCardSelector = '.card.p-4';
-  const questionTextSelector = `${questionCardSelector} h2`;
-  const answersContainerSelector = `${questionCardSelector} .mt-3`;
-  const answerOptionSelector = '.d-flex.align-items-center.mb-2 .alert.alert-secondary';
-
-  it('renders the Start Quiz button', () => {
-    cy.mount(<Quiz />);
-    cy.get(startButtonSelector)
-      .should('exist')
-      .and('have.text', 'Start Quiz');
-  });
-
-  it('displays a question after clicking the Start Quiz button', () => {
-    // Mock API call with fixture
-    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('getQuizQuestions');
-
-    cy.mount(<Quiz />);
-
-    // Start the quiz
-    cy.get(startButtonSelector)
+  it('should render the Start Quiz Button', () => {
+    cy.mount(<Quiz />)
+    
+    // Check that the start quiz button exists and has correct text
+    cy.get('button')
       .should('exist')
       .and('have.text', 'Start Quiz')
-      .click();
+  })
 
-    // Wait for the questions API to respond
-    cy.wait('@getQuizQuestions');
+  it('should render the Start Quiz Button and then render the sample question', () => {
+    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('quizQuestions')
+    cy.mount(<Quiz />)
 
-    // Validate that the question card is displayed
-    cy.get(questionCardSelector)
+    // Start the quiz by clicking the button
+    cy.get('button')
       .should('exist')
+      .and('have.text', 'Start Quiz')
+      .click()
+
+    // Wait for the question to be loaded after the button click
+    cy.wait('@quizQuestions')
+
+    // Check if the quiz card is present
+    cy.get('.card.p-4')
+      .should('exist')
+      .and('be.visible')
+      
+    // Check if the question is rendered correctly
+    cy.get('.card.p-4')
+      .find('h2')
+      .should('exist')
+      .and('include.text', '?') // Ensure the question mark appears (or a sample question text)
+
+    // Check if the answer options exist and are rendered correctly
+    cy.get('.card.p-4')
+      .find('.mt-3')
+      .should('exist')
+      .and('be.visible')
       .within(() => {
-        // Check the question text
-        cy.get('h2').should('exist').and('include.text', '?');
-
-        // Check the answers section
-        cy.get(answersContainerSelector)
-          .should('exist')
-          .find(answerOptionSelector)
+        cy.get('.d-flex.align-items-center.mb-2')
           .should('have.length', 4)
-          .and('not.be.empty');
-      });
-  });
-});
- */
-
-import Quiz from '../../client/src/components/Quiz';
-
-describe('Quiz.cy.jsx', () => {
-  it('renders the Start Quiz button', () => {
-    cy.mount(<Quiz />);
-    cy.get('button').should('exist').and('have.text', 'Start Quiz');
-  });
-
-  it('displays a question after clicking the Start Quiz button', () => {
-    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('quizQuestions');
-    cy.mount(<Quiz />);
-    cy.get('button').click();
-    cy.wait('@quizQuestions');
-    cy.get('.card.p-4 h2').should('contain.text', '?');
-  });
-});
+          .and('not.be.empty')
+          
+        cy.get('.alert.alert-secondary.mb-0.ms-2.flex-grow-1')
+          .should('have.length', 4)
+          .and('not.be.empty')
+      })
+  })
+})
