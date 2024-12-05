@@ -7,8 +7,9 @@
 * [Description](#description)
 * [Installation](#installation)
 * [Usage Information](#usage-information)
-* [Contribution Guidelines](#contribution-guidelines)
+* [Screenshots](#screenshots)
 * [Test Instructions](#test-instructions)
+* [Links](#links)
 * [License](#license)
 * [Questions](#questions)
 
@@ -24,13 +25,19 @@ This project is part of the UMN Coding Module Challenge. The objective was to im
 
 Running the Component Tests
 
-## Contribution Guidelines
+## Screenshots
 
-Please refer to the CONTRIBUTING.md file for guidelines.
+![2024-12-05_165943](https://github.com/user-attachments/assets/5375c649-1540-4223-a673-082517adbdf2)
+
 
 ## Test Instructions
 
 1. npm run component-test. 2. npm run test.
+
+## Links
+
+GitHub repo - git@github.com:Leo-webdev7/CodeQuest-Suite.git
+Walkthrough video - https://drive.google.com/file/d/1L7aFUyvMW8jEAgRrMYXoWRBMPZCmK0mA/view?usp=sharing
 
 ## License
 
