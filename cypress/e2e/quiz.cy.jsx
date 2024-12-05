@@ -1,64 +1,67 @@
-/// <reference types="cypress" />
 
-describe('Tech Quiz E2E Test', () => {
-  beforeEach(() => {
-    // Load the quiz page
-    cy.visit('/quiz');
+    describe('E2E Quiz Test', () => {
+  // Helper function to answer a question
+  const answerQuestion = (answerIndex) => {
+    cy.get('.mt-3 .btn.btn-primary')
+      .eq(answerIndex)
+      .click();
+  };
+
+  it('user can access the Start Quiz page', () => {
+    cy.visit('http://localhost:3001/');
+    cy.get('button')
+      .should('exist')
+      .and('have.text', 'Start Quiz');
   });
 
-  it('displays the first question and its answers', () => {
+  it('user can complete the quiz and see the final score', () => {
+    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('quizQuestions');
+    cy.visit('http://localhost:3001/');
+    
+    // Start the quiz
+    cy.get('button')
+      .should('exist')
+      .and('have.text', 'Start Quiz')
+      .click();
+    cy.wait('@quizQuestions');
+
+    // Load questions from the fixture
     cy.fixture('questions.json').then((questions) => {
-      const firstQuestion = questions[0];
-
-      // Check that the first question is displayed
-      cy.contains(firstQuestion.question).should('be.visible');
-
-      // Verify all answer options are displayed
-      firstQuestion.answers.forEach((answer) => {
-        cy.contains(answer.text).should('be.visible');
-      });
-    });
-  });
-
-  it('allows selecting an answer and proceeds to the next question', () => {
-    cy.fixture('questions.json').then((questions) => {
-      // Loop through all questions to simulate answering
-      questions.forEach((question, index) => {
-        // Verify question text
-        cy.contains(question.question).should('be.visible');
-
-        // Select the first answer (or any answer)
-        cy.contains(question.answers[0].text).click();
+      questions.forEach((_, index) => {
+        // Answer the question (selecting the first answer for demonstration)
+        answerQuestion(0);
 
         if (index < questions.length - 1) {
-          // Click the Next button to proceed to the next question
-          cy.contains('Next').click();
-        } else {
-          // Verify the quiz completion message on the last question
-          cy.contains('Quiz Completed').should('be.visible');
+          // Ensure the next question appears
+          cy.get('.card.p-4')
+            .find('h2')
+            .should('exist')
+            .and('include.text', '?');
         }
       });
-    });
-  });
 
-  it('validates the correct answer for each question', () => {
-    cy.fixture('questions.json').then((questions) => {
-      questions.forEach((question, index) => {
-        // Verify question text
-        cy.contains(question.question).should('be.visible');
-
-        // Select the correct answer
-        const correctAnswer = question.answers.find((ans) => ans.isCorrect);
-        cy.contains(correctAnswer.text).click();
-
-        if (index < questions.length - 1) {
-          // Click the Next button to proceed to the next question
-          cy.contains('Next').click();
-        } else {
-          // Verify the quiz completion message
-          cy.contains('Quiz Completed').should('be.visible');
-        }
+      // Verify the quiz completion screen
+      cy.get('.card.p-4.text-center').should('exist').within(() => {
+        cy.get('h2')
+          .should('exist')
+          .and('include.text', 'Quiz Completed');
+        cy.get('.alert.alert-success')
+          .should('exist')
+          .and('include.text', 'Your score:');
+        cy.get('button')
+          .should('exist')
+          .and('have.text', 'Take New Quiz')
+          .click();
       });
+
+      // Ensure quiz resets to the first question
+      cy.get('.card.p-4')
+        .find('h2')
+        .should('exist')
+        .and('include.text', '?');
+      cy.get('.d-flex.align-items-center.mb-2')
+        .should('exist')
+        .and('have.length', 4);
     });
   });
 });

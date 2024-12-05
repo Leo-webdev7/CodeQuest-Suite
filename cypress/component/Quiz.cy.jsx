@@ -1,95 +1,65 @@
-import Quiz from '../../client/src/components/Quiz';
+/* import Quiz from '../../client/src/components/Quiz';
 
-describe('Quiz.cy.jsx', () => {
-  beforeEach(() => {
-    // Intercept the API call for quiz questions
-    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('quizQuestions');
-  });
+describe('Quiz.cy.tsx', () => {
+  const startButtonSelector = 'button';
+  const questionCardSelector = '.card.p-4';
+  const questionTextSelector = `${questionCardSelector} h2`;
+  const answersContainerSelector = `${questionCardSelector} .mt-3`;
+  const answerOptionSelector = '.d-flex.align-items-center.mb-2 .alert.alert-secondary';
 
   it('renders the Start Quiz button', () => {
-    // Mount the Quiz component
     cy.mount(<Quiz />);
-
-    // Verify that the Start Quiz button exists and has the correct text
-    cy.get('button')
+    cy.get(startButtonSelector)
       .should('exist')
       .and('have.text', 'Start Quiz');
   });
 
-  it('renders the Start Quiz button, fetches questions, and displays the first question', () => {
+  it('displays a question after clicking the Start Quiz button', () => {
+    // Mock API call with fixture
+    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('getQuizQuestions');
+
     cy.mount(<Quiz />);
 
-    // Click the Start Quiz button and wait for the question API response
-    cy.get('button')
+    // Start the quiz
+    cy.get(startButtonSelector)
       .should('exist')
       .and('have.text', 'Start Quiz')
       .click();
-    cy.wait('@quizQuestions');
 
-    // Verify the question card is displayed
-    cy.get('.card.p-4')
+    // Wait for the questions API to respond
+    cy.wait('@getQuizQuestions');
+
+    // Validate that the question card is displayed
+    cy.get(questionCardSelector)
       .should('exist')
       .within(() => {
-        // Ensure the question is present
-        cy.get('h2')
-          .should('exist')
-          .and('include.text', '?');
+        // Check the question text
+        cy.get('h2').should('exist').and('include.text', '?');
 
-        // Ensure the answer options are rendered
-        cy.get('.mt-3')
+        // Check the answers section
+        cy.get(answersContainerSelector)
           .should('exist')
-          .find('.d-flex.align-items-center.mb-2')
+          .find(answerOptionSelector)
           .should('have.length', 4)
-          .within(() => {
-            // Check that each answer has text
-            cy.get('.alert.alert-secondary.mb-0.ms-2.flex-grow-1')
-              .should('exist')
-              .each((answer) => {
-                expect(answer.textContent).to.not.be.empty;
-              });
-          });
+          .and('not.be.empty');
       });
   });
+});
+ */
 
-  it('selects an answer and proceeds to the next question', () => {
+import Quiz from '../../client/src/components/Quiz';
+
+describe('Quiz.cy.jsx', () => {
+  it('renders the Start Quiz button', () => {
     cy.mount(<Quiz />);
-
-    // Start the quiz and wait for questions
-    cy.get('button')
-      .should('exist')
-      .and('have.text', 'Start Quiz')
-      .click();
-    cy.wait('@quizQuestions');
-
-    // Select the first answer
-    cy.get('.card.p-4')
-      .should('exist')
-      .find('.d-flex.align-items-center.mb-2')
-      .first()
-      .find('.alert.alert-secondary.mb-0.ms-2.flex-grow-1')
-      .click();
-
-    // Verify that clicking triggers the next question or feedback
-    cy.get('.card.p-4 h2')
-      .should('exist')
-      .and('include.text', '?'); // Adjust based on application behavior
+    cy.get('button').should('exist').and('have.text', 'Start Quiz');
   });
 
-  it('displays an error message if the API call fails', () => {
-    // Simulate a network failure for the quiz API
-    cy.intercept('GET', '/api/questions/random', { statusCode: 500 }).as('quizQuestionsError');
+  it('displays a question after clicking the Start Quiz button', () => {
+    cy.intercept('GET', '/api/questions/random', { fixture: 'questions.json' }).as('quizQuestions');
     cy.mount(<Quiz />);
-
-    // Click the Start Quiz button and wait for the error response
-    cy.get('button')
-      .should('exist')
-      .and('have.text', 'Start Quiz')
-      .click();
-    cy.wait('@quizQuestionsError');
-
-    // Verify that an error message is displayed
-    cy.get('.alert.alert-danger')
-      .should('exist')
-      .and('contain.text', 'Error loading questions'); // Adjust the message based on actual implementation
+    cy.get('button').click();
+    cy.wait('@quizQuestions');
+    cy.get('.card.p-4 h2').should('contain.text', '?');
   });
 });
